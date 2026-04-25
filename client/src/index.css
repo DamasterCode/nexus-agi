@@ -1,0 +1,293 @@
+/* ============================================================
+   DESIGN SYSTEM: Cyberpunk Minimalism / Biopunk Chrome
+   - Void dark background (#0a0e14)
+   - Electric cyan-blue accent (#00b4ff)
+   - Metallic silver text (#b0bec5)
+   - Circuit-trace decorative SVG lines
+   - Asymmetric split-panel: avatar left, chat right
+   - Fonts: Orbitron (display) + Space Grotesk (body)
+   ============================================================ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom cyberpunk tokens */
+  --color-cyber-blue: #00b4ff;
+  --color-cyber-blue-dim: rgba(0, 180, 255, 0.15);
+  --color-cyber-blue-glow: rgba(0, 180, 255, 0.4);
+  --color-metal-silver: #b0bec5;
+  --color-void: #0a0e14;
+  --color-void-2: #0f1520;
+  --color-void-3: #141e2d;
+  --color-panel: rgba(15, 21, 32, 0.85);
+}
+
+:root {
+  --radius: 0.25rem;
+  --background: oklch(0.08 0.015 240);
+  --foreground: oklch(0.85 0.01 220);
+  --card: oklch(0.1 0.018 240);
+  --card-foreground: oklch(0.85 0.01 220);
+  --popover: oklch(0.1 0.018 240);
+  --popover-foreground: oklch(0.85 0.01 220);
+  --primary: oklch(0.65 0.18 220);
+  --primary-foreground: oklch(0.05 0.01 240);
+  --secondary: oklch(0.14 0.02 240);
+  --secondary-foreground: oklch(0.75 0.01 220);
+  --muted: oklch(0.12 0.015 240);
+  --muted-foreground: oklch(0.55 0.015 220);
+  --accent: oklch(0.65 0.18 220);
+  --accent-foreground: oklch(0.05 0.01 240);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.65 0.18 220 / 0.2);
+  --input: oklch(0.65 0.18 220 / 0.15);
+  --ring: oklch(0.65 0.18 220 / 0.5);
+  --chart-1: oklch(0.65 0.18 220);
+  --chart-2: oklch(0.55 0.15 200);
+  --chart-3: oklch(0.45 0.12 240);
+  --chart-4: oklch(0.7 0.2 210);
+  --chart-5: oklch(0.6 0.16 230);
+  --sidebar: oklch(0.1 0.018 240);
+  --sidebar-foreground: oklch(0.85 0.01 220);
+  --sidebar-primary: oklch(0.65 0.18 220);
+  --sidebar-primary-foreground: oklch(0.05 0.01 240);
+  --sidebar-accent: oklch(0.14 0.02 240);
+  --sidebar-accent-foreground: oklch(0.75 0.01 220);
+  --sidebar-border: oklch(0.65 0.18 220 / 0.15);
+  --sidebar-ring: oklch(0.65 0.18 220 / 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: #0a0e14;
+    color: #b0bec5;
+    overflow: hidden;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
+  }
+}
+
+/* ============================================================
+   CUSTOM CYBERPUNK ANIMATIONS
+   ============================================================ */
+
+@keyframes eye-pulse {
+  0%, 100% { opacity: 0.6; filter: blur(0px); }
+  50% { opacity: 1; filter: blur(1px); }
+}
+
+@keyframes glow-ring-1 {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes glow-ring-2 {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes glow-ring-3 {
+  0% { transform: scale(1); opacity: 0.3; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes avatar-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+
+@keyframes circuit-trace {
+  0% { stroke-dashoffset: 300; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.4; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes message-slide-in-right {
+  from { transform: translateX(20px) translateY(4px); opacity: 0; }
+  to { transform: translateX(0) translateY(0); opacity: 1; }
+}
+
+@keyframes message-slide-in-left {
+  from { transform: translateX(-20px) translateY(4px); opacity: 0; }
+  to { transform: translateX(0) translateY(0); opacity: 1; }
+}
+
+@keyframes input-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 180, 255, 0); }
+  50% { box-shadow: 0 0 16px 2px rgba(0, 180, 255, 0.25); }
+}
+
+@keyframes status-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes particle-float {
+  0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-80px) translateX(20px); opacity: 0; }
+}
+
+@keyframes header-slide-down {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Utility classes */
+.animate-eye-pulse { animation: eye-pulse 2s ease-in-out infinite; }
+.animate-avatar-breathe { animation: avatar-breathe 4s ease-in-out infinite; }
+.animate-glow-ring-1 { animation: glow-ring-1 2.5s ease-out infinite; }
+.animate-glow-ring-2 { animation: glow-ring-2 2.5s ease-out infinite 0.6s; }
+.animate-glow-ring-3 { animation: glow-ring-3 2.5s ease-out infinite 1.2s; }
+.animate-scanline { animation: scanline 8s linear infinite; }
+.animate-typing-1 { animation: typing-dot 1.2s ease-in-out infinite; }
+.animate-typing-2 { animation: typing-dot 1.2s ease-in-out infinite 0.2s; }
+.animate-typing-3 { animation: typing-dot 1.2s ease-in-out infinite 0.4s; }
+.animate-msg-right { animation: message-slide-in-right 0.35s ease-out forwards; }
+.animate-msg-left { animation: message-slide-in-left 0.35s ease-out forwards; }
+.animate-input-glow { animation: input-glow-pulse 2s ease-in-out infinite; }
+.animate-status-blink { animation: status-blink 1.5s ease-in-out infinite; }
+.animate-header-in { animation: header-slide-down 0.5s ease-out forwards; }
+.animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e14;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 180, 255, 0.3);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 180, 255, 0.6);
+}
+
+/* Glow text utility */
+.text-glow-blue {
+  text-shadow: 0 0 10px rgba(0, 180, 255, 0.8), 0 0 20px rgba(0, 180, 255, 0.4);
+}
+
+/* Circuit border */
+.circuit-border {
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  box-shadow: 0 0 12px rgba(0, 180, 255, 0.08), inset 0 0 12px rgba(0, 180, 255, 0.04);
+}
+
+/* Frosted glass panel */
+.glass-panel {
+  background: rgba(15, 21, 32, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 180, 255, 0.15);
+}
