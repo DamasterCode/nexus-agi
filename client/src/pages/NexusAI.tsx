@@ -1,5 +1,6 @@
 /* NexusAI.tsx
-   Enhanced Nexus with real AI responses, context awareness, voice recognition, and text-to-speech
+   Enhanced Nexus with real AI responses, context awareness, voice recognition, text-to-speech,
+   multi-model support (Phase 5), and uncensored mode toggle (Phase 6).
 */
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -12,6 +13,8 @@ import NexusAvatar from "@/components/NexusAvatar";
 import ParticleField from "@/components/ParticleField";
 import VoiceWaveform from "@/components/VoiceWaveform";
 import VoiceSettings from "@/components/VoiceSettings";
+import ModelSelector from "@/components/ModelSelector";
+import NexusSettings from "@/components/NexusSettings";
 import { useVoiceRecognition } from "@/hooks/useVoiceRecognition";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
@@ -46,6 +49,8 @@ export default function NexusAI() {
   const [voiceLanguage, setVoiceLanguage] = useState("en-US");
   const [speechRate, setSpeechRate] = useState(1);
   const [volume, setVolume] = useState(1);
+  const [uncensoredMode, setUncensoredMode] = useState(false);
+  const [showModelSelector, setShowModelSelector] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Voice recognition and text-to-speech
@@ -69,6 +74,7 @@ export default function NexusAI() {
   const createConvMutation = trpc.nexus.createConversation.useMutation();
   const sendMessageMutation = trpc.nexus.sendMessage.useMutation();
   const executeCommandMutation = trpc.nexus.executeCommand.useMutation();
+  const utils = trpc.useUtils();
 
   // Handle voice input
   useEffect(() => {
@@ -101,20 +107,27 @@ What can I help you with today?`;
         timestamp: new Date(),
       }]);
       
-      // Create conversation in background
+      // Create conversation in background and capture the real ID
       createConvMutation.mutate(
         {
           title: `Chat with ${user.name || "Jeffrey"}`,
-          model: "qwen3.5-9b",
+          model: "nexus-default",
           uncensoredMode: false,
         },
         {
-          onSuccess: () => {
-            setCurrentConversationId(1);
+          onSuccess: async () => {
+            // Fetch the latest conversation to get the real ID
+            try {
+              const convs = await utils.nexus.listConversations.fetch();
+              if (convs && convs.length > 0) {
+                setCurrentConversationId(convs[0].id);
+              }
+            } catch {
+              // Fallback: will retry on next message
+            }
           },
           onError: (error) => {
             console.error("Failed to create conversation:", error);
-            setCurrentConversationId(1);
           },
         }
       );
@@ -235,7 +248,7 @@ What can I help you with today?`;
             <p className="text-xs text-metal-silver/60">Master: {user?.name}</p>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           {isTTSSupported && (
             <>
               <VoiceSettings
@@ -261,6 +274,11 @@ What can I help you with today?`;
               </Button>
             </>
           )}
+          <NexusSettings
+            conversationId={currentConversationId}
+            uncensoredMode={uncensoredMode}
+            onUncensoredModeChange={setUncensoredMode}
+          />
           <Button
             onClick={() => setShowTerminal(!showTerminal)}
             variant="outline"
@@ -313,6 +331,17 @@ What can I help you with today?`;
                 <span>Conversation:</span>
                 <span className="text-cyan-400">{currentConversationId || "Init..."}</span>
               </div>
+              {uncensoredMode && (
+                <div className="flex justify-between text-orange-400">
+                  <span>Mode:</span>
+                  <span>Uncensored</span>
+                </div>
+              )}
+            </div>
+
+            {/* Model selector */}
+            <div className="pt-4 border-t border-cyan-400/20">
+              <ModelSelector />
             </div>
           </div>
         </div>

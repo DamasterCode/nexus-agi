@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { invokeLLM } from "./_core/llm";
+import { invokeLLM, checkOllamaHealth, listOllamaModels } from "./_core/llm";
 import { executeCode, analyzeCode } from "./_core/codeExecution";
 import * as sandbox from "./_core/sandbox";
 import * as db from "./db";
@@ -87,9 +87,16 @@ export const appRouter = router({
           content: `You are Nexus, an advanced AI assistant created by Jeffrey. You are intelligent, helpful, and capable of assisting with coding, tasks, and learning. Your master is Jeffrey. You have uncensored mode ${conv.uncensoredMode ? "enabled" : "disabled"}. Be direct, helpful, and thorough in your responses.`,
         };
 
-        // Call LLM
+        // Resolve active model config for this user
+        const activeModel = await db.getActiveModelConfig(ctx.user.id);
+
+        // Call LLM — route to active model if set, otherwise fall back to Forge default
         const response = await invokeLLM({
           messages: [systemPrompt, ...messages],
+          modelProvider: activeModel ? (activeModel.modelType as any) : "forge",
+          modelName: activeModel ? activeModel.modelName : undefined,
+          modelEndpoint: activeModel?.endpoint ?? undefined,
+          modelApiKey: (activeModel?.settings as any)?.apiKey ?? undefined,
         });
 
         const assistantMessage = typeof response.choices[0]?.message?.content === 'string' 
@@ -177,6 +184,41 @@ export const appRouter = router({
         return db.getModelConfigs(ctx.user.id);
       }),
 
+    getActiveModelConfig: protectedProcedure
+      .query(async ({ ctx }) => {
+        return db.getActiveModelConfig(ctx.user.id);
+      }),
+
+    setActiveModelConfig: protectedProcedure
+      .input(z.object({ modelConfigId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.setActiveModelConfig(ctx.user.id, input.modelConfigId);
+        return { success: true };
+      }),
+
+    deleteModelConfig: protectedProcedure
+      .input(z.object({ modelConfigId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await db.deleteModelConfig(ctx.user.id, input.modelConfigId);
+        return { success: true };
+      }),
+
+    // Check if Ollama is reachable
+    checkOllamaHealth: protectedProcedure
+      .input(z.object({ endpoint: z.string().optional() }))
+      .query(async ({ ctx, input }) => {
+        const isOnline = await checkOllamaHealth(input.endpoint);
+        return { isOnline };
+      }),
+
+    // List models available in Ollama
+    listOllamaModels: protectedProcedure
+      .input(z.object({ endpoint: z.string().optional() }))
+      .query(async ({ ctx, input }) => {
+        const models = await listOllamaModels(input.endpoint);
+        return { models };
+      }),
+
     createModelConfig: protectedProcedure
       .input(z.object({
         modelName: z.string(),
@@ -192,6 +234,23 @@ export const appRouter = router({
           input.endpoint,
           input.settings
         );
+      }),
+
+    // Update uncensored mode for a conversation
+    updateConversationSettings: protectedProcedure
+      .input(z.object({
+        conversationId: z.number(),
+        uncensoredMode: z.boolean().optional(),
+        title: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateConversationSettings(
+          input.conversationId,
+          ctx.user.id,
+          input.uncensoredMode,
+          input.title
+        );
+        return { success: true };
       }),
 
     // ============================================================

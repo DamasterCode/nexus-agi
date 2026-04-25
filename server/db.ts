@@ -121,6 +121,26 @@ export async function getConversations(userId: number) {
     .orderBy(desc(conversations.updatedAt));
 }
 
+export async function updateConversationSettings(
+  conversationId: number,
+  userId: number,
+  uncensoredMode?: boolean,
+  title?: string
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const updateData: Record<string, unknown> = {};
+  if (uncensoredMode !== undefined) updateData.uncensoredMode = uncensoredMode;
+  if (title !== undefined) updateData.title = title;
+
+  if (Object.keys(updateData).length === 0) return;
+
+  return db.update(conversations)
+    .set(updateData)
+    .where(and(eq(conversations.id, conversationId), eq(conversations.userId, userId)));
+}
+
 export async function getConversationById(conversationId: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -232,4 +252,38 @@ export async function createModelConfig(userId: number, modelName: string, model
     endpoint,
     settings,
   });
+}
+
+export async function setActiveModelConfig(userId: number, modelConfigId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Deactivate all models for this user
+  await db.update(modelConfigs)
+    .set({ isActive: false })
+    .where(eq(modelConfigs.userId, userId));
+
+  // Activate the selected model
+  return db.update(modelConfigs)
+    .set({ isActive: true })
+    .where(and(eq(modelConfigs.id, modelConfigId), eq(modelConfigs.userId, userId)));
+}
+
+export async function getActiveModelConfig(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(modelConfigs)
+    .where(and(eq(modelConfigs.userId, userId), eq(modelConfigs.isActive, true)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function deleteModelConfig(userId: number, modelConfigId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.delete(modelConfigs)
+    .where(and(eq(modelConfigs.id, modelConfigId), eq(modelConfigs.userId, userId)));
 }

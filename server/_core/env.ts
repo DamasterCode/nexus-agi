@@ -7,4 +7,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // Ollama / local model support
+  ollamaUrl: process.env.OLLAMA_URL ?? "http://localhost:11434",
+  llamaCppUrl: process.env.LLAMA_CPP_URL ?? "http://localhost:8080",
 };
